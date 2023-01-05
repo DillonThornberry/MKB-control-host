@@ -14,12 +14,28 @@ mouseListener = None  # Event listener to mouse movements
 controller = mouse.Controller()  # Controller to move mouse
 lastPosition = np.array(controller.position)  # Stores last location of mouse on screen
 window = None
-window = pyglet.window.Window(caption='Controlling other PC')
+
+
+window = pyglet.window.Window(fullscreen=False, style=pyglet.window.Window.WINDOW_STYLE_TRANSPARENT, visible=False)
+label = pyglet.text.Label('Controlling other PC (alt+x to quit)',
+                          font_name='Times New Roman',
+                          font_size=36,
+                          x=window.width//2, y=window.height//2,
+                          anchor_x='center', anchor_y='center')
+
+@window.event
+def on_draw():
+    window.clear()
+    label.draw()
+
+pyglet.app.run()
+
 
 def startListeners():
     global mouseListener
-    global window
+    #global window
 
+    window.set_visible(True)
     # window = pyglet.window.Window(caption='Controlling other PC') # fullscreen=True, style=pyglet.window.Window.WINDOW_STYLE_TRANSPARENT,
 
     # Start event listener for mouse actions
@@ -33,12 +49,16 @@ def startListeners():
 
 def killListeners():
     global mouseListener
+    global window
+
+    window.set_visible(False)
     mouseListener.stop()
 
 
 def flipActive():
     global isActive
     isActive = not isActive
+    print(isActive)
     if isActive:
         startListeners()
     else:
@@ -51,7 +71,7 @@ def onMove(x, y):
     global lastPosition
     newPosition = np.array((x, y))
     deltaPosition = newPosition - lastPosition
-    #print(deltaPosition)
+    print(deltaPosition)
     lastPosition = newPosition
 
 
