@@ -20,6 +20,7 @@ def flipActive():
 
 def onMove(x, y):
     print((x, y))
+    return
 
 
 
