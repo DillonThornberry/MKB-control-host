@@ -1,93 +1,65 @@
-import numpy as np
-import keyboard as kb
-from pynput import mouse
-import asyncio
 import websockets as ws
-import pyglet
+import pygame
+from pygame.locals import *
+from dotenv import load_dotenv
+import os
+from time import sleep
 
-ACTIVATE_HOTKEY = 'alt+x'
+load_dotenv()
+pygame.init()
+
 PORT = 8080
 
-isActive = False   # Boolean for whether to actively listen for mkb inputs
-kb.add_hotkey(ACTIVATE_HOTKEY, lambda: flipActive())  # Listens for hotkey to turn listeners on or off
-mouseListener = None  # Event listener to mouse movements
-controller = mouse.Controller()  # Controller to move mouse
-lastPosition = np.array(controller.position)  # Stores last location of mouse on screen
-window = None
+PC = {
+    'gaming': os.getenv("GAMING_PC")
+}
 
 
-window = pyglet.window.Window(fullscreen=False, style=pyglet.window.Window.WINDOW_STYLE_TRANSPARENT, visible=False)
-label = pyglet.text.Label('Controlling other PC (alt+x to quit)',
-                          font_name='Times New Roman',
-                          font_size=36,
-                          x=window.width//2, y=window.height//2,
-                          anchor_x='center', anchor_y='center')
+class PC_Button:
+    WIDTH, HEIGHT = 500, 300
 
-@window.event
-def on_draw():
-    window.clear()
-    label.draw()
+    def __init__(self, screen, position, text, address):
+        self.screen = screen
+        self.position = position
+        self.text = text
+        self.address = address
+        self.rect = pygame.Rect(self.position[0], self.position[1], self.WIDTH, self.HEIGHT)
+        self.draw()
 
-pyglet.app.run()
+    def locatedIn(self, position):
+        left = self.position[0]
+        right = left + self.WIDTH
+        top = position[1]
+        bottom = top + self.HEIGHT
+        return left <= position[0] <= right and top <= position[1] <= bottom
 
-
-def startListeners():
-    global mouseListener
-    #global window
-
-    window.set_visible(True)
-    # window = pyglet.window.Window(caption='Controlling other PC') # fullscreen=True, style=pyglet.window.Window.WINDOW_STYLE_TRANSPARENT,
-
-    # Start event listener for mouse actions
-    mouseListener = mouse.Listener(
-        on_move=onMove,
-        on_scroll=onScroll,
-        on_click=onClick
-    )
-    mouseListener.start()
+    def draw(self):
+        pygame.draw.rect(self.screen, (100, 100, 100), self.rect)
 
 
-def killListeners():
-    global mouseListener
-    global window
+def main():
+    print(PC['gaming'])
 
-    window.set_visible(False)
-    mouseListener.stop()
+    active = True
+    screen = pygame.display.set_mode()
 
+    buttons = [
+        PC_Button(screen, (100, 300), "Gaming PC", PC['gaming']),
+        PC_Button(screen, (700, 300), "Living Room PC", PC['gaming']),
+        PC_Button(screen, (1300, 300), "Laptop", PC['gaming'])
+        ]
 
-def flipActive():
-    global isActive
-    isActive = not isActive
-    print(isActive)
-    if isActive:
-        startListeners()
-    else:
-        killListeners()
+    pygame.display.update()
 
-
-
-
-def onMove(x, y):
-    global lastPosition
-    newPosition = np.array((x, y))
-    deltaPosition = newPosition - lastPosition
-    print(deltaPosition)
-    lastPosition = newPosition
-
-
-def onScroll(x, y, dx, dy):
-    print(dx, dy)
-    #controller.scroll(-dx, -dy)
-
-
-def onClick(x, y, button, pressed):
-    return
-
-
-async def main():
-    async with ws.serve(None, "", PORT):
-        await asyncio.Future()
+    while active:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                active = False
+            elif event.type == KEYDOWN:
+                if event.key == K_ESCAPE:
+                    active = False
+    pygame.quit()
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    main()
