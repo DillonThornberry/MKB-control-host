@@ -3,6 +3,7 @@ from pygame.locals import *
 from dotenv import load_dotenv
 import os
 from WS_Client import WS_Client
+import asyncio
 from time import sleep
 
 load_dotenv()
@@ -40,7 +41,7 @@ class PC_Button:
         self.screen.blit(self.text, self.textRect)
 
 
-def main():
+async def main():
     print(PC['gaming'])
 
     active = True
@@ -77,6 +78,9 @@ def main():
                             print(button.caption)
                             UI_mode = False
                             client = WS_Client(button.address)
+                            await client.connect()
+                            print('after')
+
             else:
                 if event.type == KEYDOWN:
                     if event.key == K_x and pygame.key.get_mods() & KMOD_ALT:
@@ -86,4 +90,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())
