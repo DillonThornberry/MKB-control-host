@@ -1,14 +1,12 @@
-import websockets as ws
 import pygame
 from pygame.locals import *
 from dotenv import load_dotenv
 import os
+from WS_Client import WS_Client
 from time import sleep
 
 load_dotenv()
 pygame.init()
-
-PORT = 8080
 
 PC = {
     'gaming': os.getenv("GAMING_PC")
@@ -62,6 +60,7 @@ def main():
 
     pygame.display.update()
     UI_mode = True
+    ws_client = None
 
     while active:
         for event in pygame.event.get():
@@ -69,12 +68,19 @@ def main():
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         active = False
+                    elif event.key == K_x and pygame.key.get_mods() & KMOD_ALT:
+                        print('alt+x')
+
                 elif event.type == MOUSEBUTTONDOWN:
                     for button in buttons:
                         if button.locatedIn(pygame.mouse.get_pos()):
                             print(button.caption)
+                            UI_mode = False
+                            client = WS_Client(button.address)
             else:
-                None
+                if event.type == KEYDOWN:
+                    if event.key == K_x and pygame.key.get_mods() & KMOD_ALT:
+                        active = False
 
     pygame.quit()
 
